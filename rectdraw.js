@@ -13,12 +13,13 @@ function setup(filename){
 	setupLayers();
 	mouselayer.onmousedown = function(e){mouseDown(e);}
 	window.onkeypress = function(e){handleKey(e);}
-	loadTile(filename);
+	//loadTile(filename);
 }
 
 
 function setupLayers(){
 	rectlayer = document.getElementById('rectlayer');
+	
 	rectlayer.width = 700;
 	rectlayer.height = 550;
 	mouselayer = document.getElementById('mouselayer');
@@ -163,6 +164,7 @@ function redrawRect(ctx, r){
 	}
 }
 
+
 function fillRoundRect(ctx, ix1, iy1, ix2, iy2, r){
 	var x1=Math.min(ix1, ix2), y1=Math.min(iy1,iy2);
 	var x2=Math.max(ix1, ix2), y2=Math.max(iy1,iy2);
@@ -221,10 +223,10 @@ function dist(x1,y1,x2,y2){return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));}
 //
 /////////////////////////
 
-function loadTile(filename){
+function loadTile(user_id, sub_id){
   var request=new XMLHttpRequest()
   request.onreadystatechange=function(){tileLoaded(request);}
-  request.open('GET','rects/'+filename+'.txt',true)
+  request.open('GET','/submission/'+user_id+'/'+sub_id,true)
   request.send(null);
 }
 
@@ -243,15 +245,18 @@ function parseInts(a){
 	for(var i=1;i<a.length;i++) a[i]=parseInt(a[i]);
 }
 
-function submit(name){
-	saveTile(name, rectsString());
+function submit(user_id, sub_id){
+  data = rectsString();
+  //data += "rectlayer: "+rectlayer.toDataURL("image/png");+"\r\n";
+	saveTile(user_id, sub_id, data);
 }
 
-function saveTile(name, str){
+function saveTile(user_id, sub_id, str){
 	var request = new XMLHttpRequest();
 	request.onreadystatechange=function(){tileSaved(request);};
-	request.open('PUT', 'savetile.php?name='+name, true);
+	request.open('PUT', '/submission/'+user_id+'/'+sub_id, true);
 	request.setRequestHeader("Content-Type", 'text/plain');
+//	request.setRequestHeader("Cookie", document.cookie); //not allowed
 	request.send(str);
 }
 
@@ -265,6 +270,8 @@ function tileSaved(req, start, len){
 
 function rectsString(){
 	var res = '';
-	for(var i in rects) res=res+rects[i].join(' ')+'\r\n';
+	for(var i in rects) res=res+rects[i].join(' ')+"\r\n";
 	return res;
 }
+
+
